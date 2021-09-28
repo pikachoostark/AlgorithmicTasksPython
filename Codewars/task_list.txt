@@ -1,5 +1,4 @@
 https://www.codewars.com/kata/57658bfa28ed87ecfa00058a/python - 4 kyu - Path Finder #2: shortest path
 https://www.codewars.com/kata/5efcaedf95d7110017896ced/python - 6 kyu - IEEE 754 floating point numbers
 https://www.codewars.com/kata/5a667236145c462103000091/python - 1 kyu - Square sums
-(in progress...) https://www.codewars.com/kata/54ce4c6804fcc440a1000ecb/python - 4 kyu - Burrow-Wheeler-Transformation
 https://www.codewars.com/kata/5a331ea7ee1aae8f24000175/python - 2 kyu - Insane Coloured Triangles

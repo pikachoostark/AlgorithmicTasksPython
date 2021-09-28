@@ -1,29 +1,103 @@
-raw_str = "Humble Bumble"
-bwt_matrix = []
-for letter_index in range(len(raw_str)):
-    tmp_lst = []
-    for letter in raw_str[letter_index:]:
-        tmp_lst.append(letter)
-    for letter in raw_str[0:letter_index]:
-        tmp_lst.append(letter)
-    bwt_matrix.append(tmp_lst)
-tmp_lst = bwt_matrix[0].copy()
-bwt_matrix.sort()
-n = bwt_matrix.index(tmp_lst)
-enc_str = ''
-for word_lst in bwt_matrix:
-    enc_str += word_lst[-1]
-for i in bwt_matrix:
-    print(i)
-print(enc_str, n)
+# https://www.codewars.com/kata/54ce4c6804fcc440a1000ecb/python
+# Для сжатия последовательностей символов, полезно, когда много совпадающих символов следуют друг за другом,
+#   потому что тогда их можно сжать RLE-алгоритмом.
+#   Например: RLE-сжатие строки "aaaabbbbbbbbbbbcccccc" даёт "4a 11b 6c".
+# Конечно, RLE-сжатие интересно только тогда, когда строка содержит много совпадающих символов.
+# Но что по поводу читаемого текста? Для этого используется Преобразование Барроуза-Уилера.
+#
+# Существует даже преобразование, которое сближает совпадающие символы,
+#   называемая "Преобразование Барроуза-Уилера".
+#   https://neerc.ifmo.ru/wiki/index.php?title=Преобразование_Барроуза-Уилера
+# Это преобразование работает следующим образом:
+# 1. Пусть у нас есть последовательность длины n, тогда запишем все её сдвиги в матрицу n x n.
+# 2. Затем отсортируем эту матрицу построчно. Выход функции состоит из последнего столбца матрицы
+#       и порядкового номера исходной строки в ней.
+#
+# Разумеется мы хотим восстановить исходную строку, поэтому вот несколько подсказок:
+# 1. Выход содержит последний столбец матрицы.
+# 2. Первый столбец может быть получен сортировкой последнего столбца.
+# 3. Для каждой строки в таблице: Символы в первом столбце следуют за символами в последней колонке,
+#       в той же последовательности, что и в исходной строке.
+# 4. Вам не нужно восстанавливать исходную таблицу для восстановления исходной строки.
+#
+# Цель задания написать две функции - кодирующую и декодирующую.
+# Вместе они должны работать как функция тождества последовательности.
+# Примечание: Для пустого ввода, номер строки игнорируется.
+#
+# Вы могли заметить, что иногда символы не последовательны, хоть и достаточно близки в результате трансформации.
+# Если Вам интересно заняться этим, обратите своё внимание на следующую задачу:
+# https://www.codewars.com/kata/move-to-front-encoding/
 
-last_str = [i for i in enc_str]
-first_str = sorted(enc_str)
-print(first_str)
-print(last_str)
-dec_str = first_str[n]
-first_str.pop(n)
-last_str.pop(n)
-# while len(dec_str) != len(enc_str):
 
-# TODO...
+def bwt_encode(raw_str):
+    # Создадим пустую таблицу
+    bwt_matrix = []
+    # Заполним эту таблицу
+    for letter_index in range(len(raw_str)):
+        # Создадим пустой список (будущую строку матрицы)
+        tmp_lst = []
+        # Заполним её символами строки начиная с определённого индекса и до конца
+        for letter in raw_str[letter_index:]:
+            tmp_lst.append(letter)
+        # Затем заполним её с начала и до этого индекса
+        for letter in raw_str[0:letter_index]:
+            tmp_lst.append(letter)
+        # Добавим получившуюся строку в нашу матрицу
+        bwt_matrix.append(tmp_lst)
+    # Если матрица не пустая (обработаем исключение из условия)
+    if len(bwt_matrix) != 0:
+        # Запомним исходную строку
+        tmp_lst = bwt_matrix[0].copy()
+        # Отсортируем нашу матрицу
+        bwt_matrix.sort()
+        # Определим индекс исходной строки в отсортированной матрице
+        n = bwt_matrix.index(tmp_lst)
+        # Преобразуем список в строку для выхода функции
+        enc_str = ''
+        for word_lst in bwt_matrix:
+            enc_str += word_lst[-1]
+        return enc_str, n
+    # Если ввод был пустой, то обрабатываем это исключение
+    else:
+        return '', None
+
+
+def bwt_decode(enc_str, n):
+    # Снова обработаем исключение из условия
+    if enc_str:
+        # Запомним длину строки, чтобы не вычислять её многократно в теле функции
+        str_length = len(enc_str)
+        # Переведём строку в список и отсортируем его (получим первый столбец матрицы)
+        enc_lst = sorted([symbol for symbol in enc_str])
+        # Создадим словарь для запоминания алфавита
+        alphabet = {}
+        # Заполним алфавит
+        for symbol in enc_lst:
+            if symbol not in alphabet:
+                alphabet[symbol] = 1
+            else:
+                alphabet[symbol] += 1
+
+        # Пересчитаем по позициям в строке
+        summary = 0
+        for symbol in alphabet:
+            summary += alphabet[symbol]
+            alphabet[symbol] = summary - alphabet[symbol]
+
+        # Создадим вектор обратного преобразования
+        vector = [-1 for _ in range(str_length)]
+        for i in range(str_length):
+            vector[alphabet[enc_str[i]]] = i
+            alphabet[enc_str[i]] += 1
+
+        # Восстановим исходный текст
+        j = vector[n]
+        answer = [-1 for _ in range(str_length)]
+        for i in range(str_length):
+            answer[i] = enc_str[j]
+            j = vector[j]
+
+        return ''.join(answer)
+    else:
+        return ''
+
