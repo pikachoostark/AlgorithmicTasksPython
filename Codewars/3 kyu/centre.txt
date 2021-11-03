@@ -1,0 +1,41 @@
+class Central_Pixels_Finder:
+    def __init__(self, data, w, h):
+        self.pixels = data
+        self.width = w
+        self.height = h
+
+    def central_pixels(self, colour):
+        # Запомним длину нашего массива:
+        length = self.width * self.height
+        # Создадим список, который будет содержать глубину каждого пикселя
+        pixel_depth = [0 for _ in range(length)]
+        # Переберём весь список пикселей
+        for pixel_index in range(length):
+            # Если наш пиксель искомого цвета, то сначала присвоим его глубине значение 1
+            if self.pixels[pixel_index] == colour:
+                pixel_depth[pixel_index] = 1
+                # Если наш пиксель находится не на границе (4 условия)
+                #  не сверху                  # не слева                         # не снизу                                       # не справа
+                if pixel_index > self.width and pixel_index % self.height != 0 and pixel_index < (self.width * self.height - 1) and (pixel_index + 1) % self.height != 0:
+                    # Значит у нашего пикселя есть четыре соседа
+                    # Если у них всех глубина одинакова и равна x
+                    # То у этого пикселя глубина будет x + 1
+                    if pixel_depth[pixel_index-1] == pixel_depth[pixel_index+1] == pixel_depth[pixel_index-self.width] == pixel_depth[pixel_index+self.width]:
+                        pixel_depth[pixel_index] = pixel_depth[pixel_index-1] + 1
+
+        return pixel_depth
+
+
+image = Central_Pixels_Finder([1, 1, 4, 4, 4, 4, 2, 2, 2, 2,
+                               1, 1, 1, 1, 2, 2, 2, 2, 2, 2,
+                               1, 1, 1, 1, 2, 2, 2, 2, 2, 2,
+                               1, 1, 1, 1, 1, 3, 2, 2, 2, 2,
+                               1, 1, 1, 1, 1, 3, 3, 3, 2, 2,
+                               1, 1, 1, 1, 1, 1, 3, 3, 3, 3], 10, 6)
+
+arr = image.central_pixels(1)
+for i in range(image.height):
+    for j in range(image.width):
+        print(arr[i*image.width+j], end=' ')
+    print('\n', end='')
+
